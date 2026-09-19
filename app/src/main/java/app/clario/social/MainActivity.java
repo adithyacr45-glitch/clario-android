@@ -20,7 +20,7 @@ import android.webkit.JsResult;
 import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
-import android.webkit.SslError;
+import android.net.http.SslError;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
