@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
         s.setLoadWithOverviewMode(false);
         s.setUseWideViewPort(true);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setUserAgentString(s.getUserAgentString() + " CLARIO-Android/1.0.1");
+        s.setUserAgentString(s.getUserAgentString() + " CLARIO-Android/1.0.2");
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
@@ -124,6 +124,11 @@ public class MainActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String scheme = uri.getScheme();
+
+                if ("clario".equalsIgnoreCase(scheme) && "auth".equalsIgnoreCase(uri.getHost())) {
+                    view.loadUrl(authCompleteUrl(uri));
+                    return true;
+                }
 
                 if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) {
                     if (isAllowedInWebView(uri)) return false;
@@ -252,14 +257,34 @@ public class MainActivity extends Activity {
         }
     }
 
+    private String authCompleteUrl(Uri data) {
+        String code = data == null ? null : data.getQueryParameter("code");
+        if (code != null && code.matches("[A-Za-z0-9]{32,160}")) {
+            return APP_ORIGIN + "/api/android-auth-complete?code=" + Uri.encode(code);
+        }
+        return APP_ORIGIN + "/login?next=%2F";
+    }
+
     private String resolveLaunchUrl(Intent intent) {
         Uri data = intent == null ? null : intent.getData();
+
+        if (data != null
+            && "clario".equalsIgnoreCase(data.getScheme())
+            && "auth".equalsIgnoreCase(data.getHost())) {
+            return authCompleteUrl(data);
+        }
+
         if (data != null
             && "https".equalsIgnoreCase(data.getScheme())
             && "debate-social.hatchable.site".equalsIgnoreCase(data.getHost())) {
-            return data.toString();
+            String path = data.getEncodedPath();
+            if (path == null || path.isEmpty()) path = "/";
+            String query = data.getEncodedQuery();
+            String next = path + (query == null || query.isEmpty() ? "" : "?" + query);
+            return APP_ORIGIN + "/login?next=" + Uri.encode(next);
         }
-        return APP_ORIGIN + "/";
+
+        return APP_ORIGIN + "/login?next=%2F";
     }
 
     @Override protected void onNewIntent(Intent intent) {
