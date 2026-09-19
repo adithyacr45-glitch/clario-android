@@ -12,6 +12,5 @@
     <style name="Theme.Clario.Starting" parent="Theme.Clario">
         <item name="android:windowSplashScreenBackground">#0B0D12</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_clario_logo</item>
-        <item name="android:postSplashScreenTheme">@style/Theme.Clario</item>
     </style>
 </resources>
