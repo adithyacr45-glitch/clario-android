@@ -64,17 +64,17 @@ jobs:
             --ks-pass pass:clario-test-2026 \
             --key-pass pass:clario-test-2026 \
             --ks-key-alias clario-test \
-            --out app/build/outputs/apk/release/CLARIO-v1.0.2-test.apk \
+            --out app/build/outputs/apk/release/CLARIO-v1.0.3-test.apk \
             "$UNSIGNED_APK"
 
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify \
             --verbose \
-            app/build/outputs/apk/release/CLARIO-v1.0.2-test.apk
+            app/build/outputs/apk/release/CLARIO-v1.0.3-test.apk
 
       - name: Upload APK and AAB
         uses: actions/upload-artifact@v4
         with:
-          name: clario-android-v1.0.2
+          name: clario-android-v1.0.3
           path: |
-            app/build/outputs/apk/release/CLARIO-v1.0.2-test.apk
+            app/build/outputs/apk/release/CLARIO-v1.0.3-test.apk
             app/build/outputs/bundle/release/*.aab

@@ -49,8 +49,17 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(11, 13, 18));
-        webView.setClipToPadding(true);
-        webView.setOnApplyWindowInsetsListener((view, insets) -> {
+        webView.setPadding(0, 0, 0, 0);
+
+        root.addView(
+            webView,
+            new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        );
+
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
             int left;
             int top;
             int right;
@@ -71,21 +80,22 @@ public class MainActivity extends Activity {
                 bottom = insets.getSystemWindowInsetBottom();
             }
 
-            view.setPadding(left, top, right, bottom);
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) webView.getLayoutParams();
+            if (lp.leftMargin != left
+                || lp.topMargin != top
+                || lp.rightMargin != right
+                || lp.bottomMargin != bottom) {
+                lp.setMargins(left, top, right, bottom);
+                webView.setLayoutParams(lp);
+            }
             return insets;
         });
 
-        root.addView(
-            webView,
-            new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        );
         setContentView(root);
 
         configureWebView();
         registerBackHandler();
+        root.requestApplyInsets();
         webView.requestApplyInsets();
 
         if (state != null) {
@@ -111,7 +121,7 @@ public class MainActivity extends Activity {
         s.setLoadWithOverviewMode(false);
         s.setUseWideViewPort(true);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setUserAgentString(s.getUserAgentString() + " CLARIO-Android/1.0.2");
+        s.setUserAgentString(s.getUserAgentString() + " CLARIO-Android/1.0.3");
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
@@ -277,14 +287,10 @@ public class MainActivity extends Activity {
         if (data != null
             && "https".equalsIgnoreCase(data.getScheme())
             && "debate-social.hatchable.site".equalsIgnoreCase(data.getHost())) {
-            String path = data.getEncodedPath();
-            if (path == null || path.isEmpty()) path = "/";
-            String query = data.getEncodedQuery();
-            String next = path + (query == null || query.isEmpty() ? "" : "?" + query);
-            return APP_ORIGIN + "/login?next=" + Uri.encode(next);
+            return data.toString();
         }
 
-        return APP_ORIGIN + "/login?next=%2F";
+        return APP_ORIGIN + "/";
     }
 
     @Override protected void onNewIntent(Intent intent) {
@@ -345,6 +351,7 @@ public class MainActivity extends Activity {
         webView.setVisibility(View.VISIBLE);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        root.requestApplyInsets();
         webView.requestApplyInsets();
     }
 
@@ -372,6 +379,7 @@ public class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         webView.onResume();
+        root.requestApplyInsets();
         webView.requestApplyInsets();
     }
 
